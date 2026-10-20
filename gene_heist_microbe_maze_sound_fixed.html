@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gene Heist — Microbe Maze</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+:root{--cyan:#5fffee;--pink:#ff5ba8;--gold:#ffd166;--green:#8dff9f;--red:#ff6178;--bg:#07101d;--panel:#101e30;--line:#2a4561;--muted:#9fb5cf}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#17334a,#07101d 65%);color:#eef8ff;font-family:Rajdhani,sans-serif;min-height:100vh}
+.shell{max-width:1200px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:15px}.brand{font:700 12px Orbitron;letter-spacing:2px;color:var(--cyan)}.brand span{color:var(--pink)}.chip{border:1px solid var(--line);padding:7px 11px;border-radius:99px;color:var(--muted);font:10px Orbitron}
+h1{font:800 clamp(28px,5vw,48px)/1.15 Orbitron;margin:24px 0 8px;letter-spacing:-1.5px}h1 span{color:var(--cyan)}.sub{color:#b9cce0;font-size:18px;margin:0 0 18px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px}.panel{background:linear-gradient(145deg,#14243a,#0b1524);border:1px solid var(--line);border-radius:16px;box-shadow:0 15px 40px #0004}.gamepanel{padding:13px}.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}.stat{padding:9px 11px;border:1px solid #263e58;background:#0a1422;border-radius:10px}.stat small{display:block;font:9px Orbitron;letter-spacing:1px;color:var(--muted)}.stat b{display:block;font:700 21px Orbitron;margin-top:5px}.c{color:var(--cyan)}.p{color:var(--pink)}.g{color:var(--green)}.y{color:var(--gold)}
+canvas{display:block;width:100%;height:auto;aspect-ratio:900/540;border:1px solid #28445f;border-radius:12px;background:#081421;touch-action:none}
+.controls{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:11px}.btn{border:0;border-radius:9px;padding:10px 13px;font:700 11px Orbitron;cursor:pointer}.primary{background:var(--cyan);color:#07141c}.secondary{background:#172a40;color:#d9e8f7;border:1px solid #34516d}.btn:hover{filter:brightness(1.1)}.help{font-size:14px;color:var(--muted)}
+aside{padding:18px;height:fit-content}h2{font:700 15px Orbitron;margin:0 0 12px}.legend{display:flex;gap:10px;align-items:center;margin:11px 0;font-size:16px;color:#c9d9ea}.dot{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 12px currentColor;flex:none}.sidebox{border:1px solid #2a4058;background:#0a1422;border-radius:11px;padding:12px;margin-top:15px;font-size:15px;line-height:1.35;color:#c6d7e8}.sidebox b{color:var(--gold)}#message{min-height:70px}.meter{height:8px;background:#263a50;border-radius:99px;overflow:hidden;margin-top:7px}.meter span{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--pink));transition:width .25s}
+.overlay{position:fixed;inset:0;background:#030811df;display:grid;place-items:center;padding:18px;z-index:5;backdrop-filter:blur(7px)}.modal{max-width:590px;width:100%;padding:28px;text-align:center;background:linear-gradient(145deg,#172a41,#0a1422);border:1px solid #42637f;border-radius:20px;box-shadow:0 25px 100px #000a}.emblem{font-size:52px;filter:drop-shadow(0 0 18px #5fffee88)}.eyebrow{font:10px Orbitron;letter-spacing:2px;color:var(--cyan)}.modal h2{font-size:clamp(22px,4vw,34px);line-height:1.25;margin:12px 0}.modal p{font-size:18px;line-height:1.4;color:#c4d6e8}.modal .btn{margin-top:8px}.hidden{display:none!important}.quiz-option{background:#0b1928;color:#e8f5ff;border:1px solid #34516d;border-radius:10px;padding:12px;text-align:left;font:600 16px Rajdhani;cursor:pointer}.quiz-option:hover{border-color:var(--cyan)}.quiz-option:disabled{cursor:default;opacity:.88}.quiz-option.correct{border-color:var(--green);background:#8dff9f18}.quiz-option.wrong{border-color:var(--pink);background:#ff5ba818}.evolve-pulse{animation:evolvePulse .9s ease-out}@keyframes evolvePulse{0%{filter:brightness(1)}30%{filter:brightness(2.2) hue-rotate(35deg)}100%{filter:brightness(1)}}.endstats{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}.endstats b{font:700 24px Orbitron;color:var(--gold)}.endstats span{display:block;font:10px Orbitron;color:var(--muted);margin-top:5px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.hud{grid-template-columns:repeat(2,1fr)}aside{padding:15px}.shell{padding:13px}.help{width:100%}}
+</style></head>
+<body><div class="shell">
+<header><div class="brand">MICROVERSE // <span>ARCADE LAB</span></div><div class="chip">BTY323 • UNIT IV</div></header>
+<h1>GENE <span>HEIST</span>: MICROBE MAZE</h1><p class="sub">Move your cell. Collect free DNA. Link up with friendly cells. Evade phages. Evolve through five increasingly intense levels.</p>
+<div class="layout"><main class="panel gamepanel">
+<div class="hud"><div class="stat"><small>LEVEL</small><b class="c" id="level">01 / 05</b></div><div class="stat"><small>DNA FRAGMENTS</small><b class="y" id="dnaCount">0 / 5</b></div><div class="stat"><small>EVOLUTION XP</small><b class="p" id="score">000</b></div><div class="stat"><small>CELL INTEGRITY</small><b class="g" id="integrity">100%</b></div></div>
+<canvas id="game" width="900" height="540" aria-label="Microbe Maze game area"></canvas>
+<div class="controls"><div class="help">Move: <b>WASD</b> or <b>arrow keys</b> · Space: dash after evolution · Mobile: tap/drag</div><div><button class="btn secondary" id="soundToggle">♫ SOUND: OFF (CLICK TO ENABLE)</button> <button class="btn secondary" id="pause">PAUSE</button> <button class="btn secondary" id="restart">RESTART</button></div></div>
+</main><aside class="panel">
+<h2>FIELD SCANNER</h2>
+<div class="legend"><i class="dot" style="color:#5fffee;background:#5fffee"></i> Your cell — PX-17</div>
+<div class="legend"><i class="dot" style="color:#ffd166;background:#ffd166"></i> Free DNA — collect to evolve</div>
+<div class="legend"><i class="dot" style="color:#8dff9f;background:#8dff9f"></i> Friendly cell — touch to exchange genetic info</div>
+<div class="legend"><i class="dot" style="color:#ff5ba8;background:#ff5ba8"></i> Bacteriophage — avoid!</div>
+<div class="sidebox"><b>MISSION LOG</b><div id="message" aria-live="polite">Collect 5 DNA fragments to unlock the exit portal. Stay away from roaming phages.</div></div>
+<div class="sidebox"><b>GENETICS FACT</b><div id="fact">Transformation is the uptake of free DNA from the environment. DNA uptake does not guarantee a new trait.</div></div>
+<div class="sidebox"><b>EVOLUTION TREE</b><div id="evolution">Base cell • original shape</div><div class="meter"><span id="healthBar"></span></div><div id="evoTree" style="margin-top:8px;font-size:13px;color:#9fb5cf">Base → Speed → Shield → Dash → Prism</div></div><div class="sidebox"><b>POWER-UP</b><div id="powerStatus">No active power-up</div><div style="font-size:13px;color:#9fb5cf;margin-top:5px">Gold star: speed · cyan orb: shield · violet diamond: DNA magnet</div></div>
+<div class="sidebox"><b>HOW TO WIN</b><div>Collect DNA, tag a friendly cell at least once, and reach the glowing exit. Each level adds more phages and faster movement.</div></div>
+</aside></div>
+<p style="text-align:center;color:#69839f;font-size:13px;margin:18px 0">Fictional educational arcade simulation. Genetics concepts are simplified for learning; no real organisms or laboratory instructions.</p>
+</div>
+<div class="overlay" id="start"><div class="modal"><div class="emblem">🧬</div><div class="eyebrow">CELLULAR SURVIVAL SIMULATION</div><h2>READY TO EVOLVE?</h2><p>You are PX-17. Navigate the microscopic maze, collect glowing free-DNA fragments, meet friendly cells to learn about genetic exchange, and dodge bacteriophages. Collect enough DNA to open the portal and escape.</p><p style="font-size:14px;color:#8fa9c2">Tip: keep moving. Phages chase your cell, and each level gets harder.</p><button class="btn primary" id="startBtn">START MISSION ▶</button></div></div>
+<div class="overlay hidden" id="levelOverlay"><div class="modal"><div class="emblem" id="levelEmoji">✨</div><div class="eyebrow" id="levelEyebrow">LEVEL CLEARED</div><h2 id="levelTitle">CELL EVOLVED</h2><p id="levelText">New level unlocked.</p><button class="btn primary" id="continueBtn">CONTINUE ▶</button></div></div>
+<div class="overlay hidden" id="quizOverlay"><div class="modal"><div class="emblem">🧠</div><div class="eyebrow">EVOLUTION CHECKPOINT</div><h2 id="quizHeading">MICROBIOLOGY CHALLENGE</h2><p id="quizPrompt">Answer correctly to trigger a cell evolution upgrade.</p><div id="quizOptions" style="display:grid;gap:9px;margin:18px 0"></div><p id="quizFeedback" style="font-size:15px;min-height:24px"></p><button class="btn primary hidden" id="quizContinue">APPLY EVOLUTION ▶</button></div></div>
+<div class="overlay hidden" id="end"><div class="modal"><div class="emblem">🏆</div><div class="eyebrow">SIMULATION REPORT</div><h2 id="endTitle">MICROBE MASTER</h2><p id="endText"></p><div class="endstats"><div><b id="endScore">000</b><span>EVOLUTION XP</span></div><div><b id="endDNA">0</b><span>DNA COLLECTED</span></div><div><b id="endLevel">0/5</b><span>LEVELS CLEARED</span></div></div><button class="btn primary" id="again">PLAY AGAIN ↻</button></div></div>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const W=900,H=540,cell={x:75,y:75,r:15,speed:190,integrity:100,glow:0,shield:0,trail:[]};
+let level=1,score=0,dna=0,gotFriend=false,paused=false,running=false,gameOver=false,last=0,raf=0,particles=[],dnaBits=[],friends=[],phages=[],powerups=[],keys={},touchTarget=null,portal={x:830,y:465,r:25,open:false},maze=[],elapsed=0,evolutionStage=0,antibioticWave=0,quizPassed=false,soundOn=false,audioCtx=null,musicTimer=null,powerType='',powerTime=0,magnetTime=0,dashCooldown=0,boss=null,toastText='',toastUntil=0;
+const $=id=>document.getElementById(id);
+const facts=[
+"Transformation is the uptake of free DNA from the environment. DNA uptake does not guarantee a new trait.",
+"Conjugation involves direct cell-to-cell contact and often transfers plasmids. Not every contact leads to transfer.",
+"Transduction is DNA transfer mediated by bacteriophages. In this game, phages are hazards; the real process is more nuanced.",
+"Plasmids are DNA molecules that can replicate independently of the bacterial chromosome. Their gene content varies.",
+"Transposons are mobile genetic elements. Their movement can alter gene function, but the outcome is not always beneficial."
+];
+const notes=["Transformation concept unlocked: free DNA pickup!","Friendly-cell contact illustrates conjugation, a form of direct cell-to-cell DNA transfer.","Level cleared! DNA fragments are educational symbols, not guaranteed resistance genes.","Evolution bonus: the cell now moves faster. Traits depend on the genes acquired and expressed.","Final level! Collect the remaining DNA and reach the exit portal."];
+function rand(a,b){return a+Math.random()*(b-a)}function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function say(s){$('message').textContent=s}
+function fact(s){$('fact').textContent=s}
+
+function tone(freq=440,duration=.09,type='sine',volume=.03){
+ if(!soundOn)return;
+ try{
+  audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);
+  g.gain.setValueAtTime(volume,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration);
+ }catch(e){say('Audio unavailable in this browser. Check browser/site sound permissions.');}
+}
+function toast(text){toastText=text;toastUntil=elapsed+1.8}
+async function toggleSound(){
+ soundOn=!soundOn;
+ $('soundToggle').textContent='♫ SOUND: '+(soundOn?'ON':'OFF');
+ if(soundOn){
+  try{
+   audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+   if(audioCtx.state==='suspended')await audioCtx.resume();
+   // Audible confirmation on the same click that enables sound.
+   tone(660,.14,'sine',.055);
+   setTimeout(()=>tone(880,.16,'sine',.05),120);
+  }catch(e){say('Could not start audio. Check your browser sound permissions.');}
+  let notes=[220,277,330,277,196,247,294,247],i=0;
+  if(musicTimer)clearInterval(musicTimer);
+  musicTimer=setInterval(()=>{if(soundOn&&running&&!paused)tone(notes[i++%notes.length],.22,'triangle',.025)},430);
+  say('Sound enabled. You should hear a short confirmation tone and background melody.');
+ }else{
+  if(musicTimer)clearInterval(musicTimer);
+  musicTimer=null;
+  say('Sound is off.');
+ }
+}
+
+function burst(x,y,color,n=16){for(let i=0;i<n;i++){let a=rand(0,Math.PI*2),v=rand(35,180);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.8),max:.8,color,r:rand(2,5)})}}
+function resetLevel(keep=true){cell.x=75;cell.y=75;cell.trail=[];cell.glow=0;dnaBits=[];friends=[];phages=[];powerups=[];particles=[];boss=null;powerType='';powerTime=0;magnetTime=0;portal={x:830,y:465,r:25,open:false};maze=[];
+ // Randomized obstacle-free field keeps movement fluid and game fair.
+ let n=4+level*2;for(let i=0;i<n;i++){let x=rand(140,760),y=rand(70,465),w=rand(35,75),h=rand(18,42);if(level===2&&i%2===0)h=16;if(level===3&&i%2===0){w=18;h=rand(55,90)}if(level===4&&i%2===0)w=rand(70,110);if(level===5&&i%2===0){w=22;h=rand(65,100)}if(Math.hypot(x-cell.x,y-cell.y)<120||Math.hypot(x-portal.x,y-portal.y)<90)continue;maze.push({x,y,w,h,phase:rand(0,6),kind:level})}
+ let count=5+Math.floor(level*.7);for(let i=0;i<count;i++){let p=spot();dnaBits.push({x:p.x,y:p.y,r:8,phase:rand(0,6),got:false})}
+ for(let i=0;i<2+Math.min(level,2);i++){let p=spot();friends.push({x:p.x,y:p.y,r:15,phase:rand(0,6),met:false,vx:rand(-35,35),vy:rand(-35,35)})}
+ for(let i=0;i<1+level;i++){let p=spot();phages.push({x:p.x,y:p.y,r:13,speed:36+level*11,phase:rand(0,6),vx:0,vy:0})}
+ if(level===2||level===4){let p=spot();boss={x:p.x,y:p.y,r:24,speed:30+level*5,phase:0,warning:0,attackX:0,attackY:0};phages.push(boss)}
+ for(let i=0;i<2;i++){let p=spot();powerups.push({x:p.x,y:p.y,r:10,type:['speed','shield','magnet'][(level+i)%3],phase:rand(0,6),got:false})}
+ portal.open=false;updateHud()
+}
+function spot(){let p;for(let i=0;i<100;i++){p={x:rand(70,830),y:rand(65,480)};if(Math.hypot(p.x-cell.x,p.y-cell.y)>130&&!maze.some(o=>p.x>o.x-o.w/2-25&&p.x<o.x+o.w/2+25&&p.y>o.y-o.h/2-25&&p.y<o.y+o.h/2+25))return p}return{x:rand(150,800),y:rand(100,450)}}
+function updateHud(){$('evoTree').textContent=['● Base → ○ Speed → ○ Shield → ○ Dash → ○ Prism','✓ Base → ● Speed → ○ Shield → ○ Dash → ○ Prism','✓ Base → ✓ Speed → ● Shield → ○ Dash → ○ Prism','✓ Base → ✓ Speed → ✓ Shield → ● Dash → ○ Prism','✓ Base → ✓ Speed → ✓ Shield → ✓ Dash → ● Prism','✓ Base → ✓ Speed → ✓ Shield → ✓ Dash → ✓ Prism'][Math.max(0,Math.min(5,evolutionStage))];$('evolution').textContent=['Base cell • original shape','Cyan-green cell • membrane shimmer','Green elongated cell • movement boost','Gold cell • reinforced outline','Violet cell • shield pulse','Prismatic cell • ultimate arcade form'][Math.max(0,Math.min(5,evolutionStage))];$('level').textContent=String(level).padStart(2,'0')+' / 05';$('dnaCount').textContent=dna+' / '+(5+Math.floor(level*.7));$('score').textContent=String(score).padStart(3,'0');$('integrity').textContent=Math.max(0,Math.round(cell.integrity))+'%';$('healthBar').style.width=Math.max(0,cell.integrity)+'%';$('healthBar').style.background=cell.integrity<35?'var(--pink)':'linear-gradient(90deg,var(--green),var(--gold))';}
+function startGame(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}level=1;score=0;dna=0;gotFriend=false;cell.integrity=100;cell.speed=190;evolutionStage=0;antibioticWave=0;paused=false;gameOver=false;running=true;elapsed=0;resetLevel(false);$('start').classList.add('hidden');$('end').classList.add('hidden');$('levelOverlay').classList.add('hidden');$('pause').textContent='PAUSE';say('Mission started! Collect the glowing DNA and avoid the phages.');fact(facts[0]);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+function togglePause(){if(!running||gameOver)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';say(paused?'Simulation paused. Take a breath, then resume.':'Simulation resumed. Keep moving!');if(!paused){last=performance.now();raf=requestAnimationFrame(loop)}}
+function finish(win){running=false;gameOver=true;if(musicTimer){clearInterval(musicTimer);musicTimer=null;}$('end').classList.remove('hidden');$('endTitle').textContent=win?'MICROBE MASTER!':'CELL SIGNAL LOST';$('endText').textContent=win?'PX-17 escaped all five levels! You collected DNA, met friendly cells, and avoided the phage hazards. Remember: DNA transfer does not automatically produce antibiotic resistance.':'Your cell ran out of integrity. Review the field scanner, then try again with more movement and wider turns.';$('endScore').textContent=score;$('endDNA').textContent=dna;$('endLevel').textContent=(win?5:level-1)+'/5'}
+function nextLevel(){$('quizOverlay').classList.add('hidden');$('levelOverlay').classList.add('hidden');level++;if(level>5){finish(true);return}cell.integrity=Math.min(100,cell.integrity+18);cell.speed+=13;dna=0;resetLevel();paused=false;running=true;gameOver=false;$('pause').textContent='PAUSE';say('Level '+level+': new maze pattern, power-ups, and more dangerous phages.');fact(facts[Math.min(level-1,4)]);last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
+const checkpointQuizzes=[
+ {q:"A competent bacterium takes up naked DNA from its surroundings. Which process is this?",opts:["Conjugation","Transformation","Transduction","Binary fission"],correct:1,why:"Transformation is uptake of free environmental DNA by a competent cell."},
+ {q:"A plasmid moves between two bacterial cells in direct contact. Which process best describes this?",opts:["Transduction","Translation","Conjugation","Transformation"],correct:2,why:"Conjugation is direct cell-to-cell DNA transfer and often involves plasmids."},
+ {q:"A phage carries bacterial DNA from one bacterium to another. This is…",opts:["Transduction","Transformation","Conjugation","Fermentation"],correct:0,why:"Transduction is DNA transfer mediated by a bacteriophage."},
+ {q:"A DNA element moves to a new position in the genome. Which term fits?",opts:["Ribosome","Transposon","Capsid","Metabolite"],correct:1,why:"Transposons are mobile genetic elements; their effects can be neutral, harmful, or beneficial."},
+ {q:"A bacterium acquires a plasmid. What evidence is needed before concluding it gained antibiotic resistance?",opts:["Its colour changed","Every plasmid carries resistance","It carries a relevant resistance determinant that is expressed","The cell is larger"],correct:2,why:"Plasmids vary in gene content. Resistance depends on a relevant determinant and its expression; it is not universal invincibility."}
+];
+function showCheckpointQuiz(){
+ const q=checkpointQuizzes[level-1];quizPassed=false;
+ $('quizHeading').textContent='LEVEL '+level+' // GENETICS CHECK';
+ $('quizPrompt').textContent=q.q;$('quizFeedback').textContent='';
+ $('quizOptions').innerHTML='';$('quizContinue').classList.add('hidden');
+ q.opts.forEach(function(opt,i){
+  const button=document.createElement('button');
+  button.className='quiz-option';button.textContent=String.fromCharCode(65+i)+'. '+opt;
+  button.onclick=function(){
+   if(quizPassed)return;
+   for(let j=0;j<$('quizOptions').children.length;j++)$('quizOptions').children[j].disabled=true;
+   if(i===q.correct){
+    button.classList.add('correct');quizPassed=true;score+=75;evolutionStage=Math.min(5,evolutionStage+1);cell.speed+=7;cell.integrity=Math.min(100,cell.integrity+12);cell.shield=7;cell.glow=2;
+    burst(cell.x,cell.y,['#5fffee','#8dff9f','#ffd166','#a98bff','#ff5ba8'][evolutionStage-1],55);
+    $('quizFeedback').textContent='CORRECT! +75 XP. '+q.why+' Evolution upgrade unlocked: new look + 7-second arcade shield.';
+    $('quizFeedback').style.color='var(--green)';
+    $('evolution').textContent=['','Cyan cell • membrane shimmer','Green cell • elongated form','Gold cell • reinforced glow','Violet cell • pulse shield','Prismatic cell • ultimate arcade shield'][evolutionStage];
+    say('Evolution unlocked! Your cell visibly changes. Shield is temporary game protection, not real antibiotic immunity.');
+    fact(q.why);updateHud();$('quizContinue').classList.remove('hidden');
+   }else{
+    button.classList.add('wrong');$('quizOptions').children[q.correct].classList.add('correct');
+    $('quizFeedback').textContent='Not quite. '+q.why+' Try again to unlock this evolution.';
+    $('quizFeedback').style.color='var(--pink)';
+    for(let j=0;j<$('quizOptions').children.length;j++)if(j!==i)$('quizOptions').children[j].disabled=false;
+   }
+  };
+  $('quizOptions').appendChild(button);
+ });
+ $('quizOverlay').classList.remove('hidden');
+}
+function winLevel(){if(!portal.open){portal.open=true;burst(portal.x,portal.y,'#5fffee',35);say('DNA quota reached! The exit portal is open—reach the glowing ring.');fact('Transformation is uptake of free DNA. In real cells, DNA uptake and expression depend on compatibility and context.');}else if(dist(cell,portal)<cell.r+portal.r){score+=100;burst(portal.x,portal.y,'#ffd166',40);running=false;showCheckpointQuiz();}}
+function revealLevelClear(){
+ $('quizOverlay').classList.add('hidden');
+ $('levelEmoji').textContent=['🧬','🟢','✨','🛡️','🌈'][level-1];
+ $('levelEyebrow').textContent='LEVEL '+level+' CLEARED';
+ $('levelTitle').textContent=level===5?'MISSION COMPLETE':'CELL EVOLVED';
+ $('levelText').textContent=level===5?'You completed all five levels. Your cell has its final prismatic form and a temporary arcade shield. Real antibiotic resistance is never universal invincibility.':'Correct answer! Your cell evolved visually, gained a movement boost, and received a short shield against game hazards. Next level gets harder.';
+ $('levelOverlay').classList.remove('hidden');
+}
+function loop(t){if(!running||paused)return;let dt=Math.min(.035,(t-last)/1000||.016);last=t;elapsed+=dt;update(dt);draw();if(running&&!paused)raf=requestAnimationFrame(loop)}
+function update(dt){const old={x:cell.x,y:cell.y};let dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);
+ if(touchTarget){dx=touchTarget.x-cell.x;dy=touchTarget.y-cell.y;let d=Math.hypot(dx,dy);if(d<8)touchTarget=null;else{dx/=d;dy/=d}}
+ let l=Math.hypot(dx,dy);if(l){dx/=l;dy/=l;cell.x+=dx*cell.speed*dt;cell.y+=dy*cell.speed*dt;cell.trail.push({x:old.x,y:old.y,life:.35});}
+ cell.x=Math.max(cell.r+4,Math.min(W-cell.r-4,cell.x));cell.y=Math.max(cell.r+4,Math.min(H-cell.r-4,cell.y));cell.trail.forEach(p=>p.life-=dt);cell.trail=cell.trail.filter(p=>p.life>0);cell.glow=Math.max(0,cell.glow-dt);cell.shield=Math.max(0,cell.shield-dt);powerTime=Math.max(0,powerTime-dt);magnetTime=Math.max(0,magnetTime-dt);dashCooldown=Math.max(0,dashCooldown-dt);if(powerTime<=0&&magnetTime<=0){powerType='';if($('powerStatus'))$('powerStatus').textContent='No active power-up';}
+ for(const b of dnaBits){b.phase+=dt*3;if(!b.got&&magnetTime>0){let md=dist(cell,b);if(md<150){b.x+=(cell.x-b.x)/Math.max(1,md)*100*dt;b.y+=(cell.y-b.y)/Math.max(1,md)*100*dt}}if(!b.got&&dist(cell,b)<cell.r+b.r+3){b.got=true;dna++;score+=25;cell.glow=.7;cell.shield=.35;burst(b.x,b.y,'#ffd166',20);fact(facts[0]);say('DNA collected! +25 XP. Transformation is uptake of free DNA; a new trait is not guaranteed.');toast('DNA +25 XP');tone(660,.07);tone(880,.08);updateHud();}}
+ for(const p of powerups){p.phase+=dt*3;if(!p.got&&dist(cell,p)<cell.r+p.r+2){p.got=true;score+=20;powerType=p.type;powerTime=p.type==='shield'?8:6;magnetTime=p.type==='magnet'?6:0;if(p.type==='speed'){cell.speed+=45;$('powerStatus').textContent='SPEED BURST • 6s';setTimeout(()=>{if(cell.speed>190+evolutionStage*7)cell.speed-=45},6000)}else if(p.type==='shield'){cell.shield=8;$('powerStatus').textContent='ARCADE SHIELD • 8s'}else{$('powerStatus').textContent='DNA MAGNET • 6s'}burst(p.x,p.y,p.type==='speed'?'#ffd166':p.type==='shield'?'#5fffee':'#b7a0ff',25);toast(p.type.toUpperCase()+' POWER-UP!');tone(520,.08);tone(760,.1)}}
+ for(const f of friends){f.phase+=dt*2;f.x+=f.vx*dt;f.y+=f.vy*dt;if(f.x<40||f.x>W-40)f.vx*=-1;if(f.y<40||f.y>H-40)f.vy*=-1;if(!f.met&&dist(cell,f)<cell.r+f.r){f.met=true;gotFriend=true;score+=50;cell.glow=1;cell.integrity=Math.min(100,cell.integrity+9);burst(f.x,f.y,'#8dff9f',25);say('Friendly-cell contact! +50 XP and +9 integrity. This represents conjugation conceptually; contact alone does not guarantee transfer.');fact(facts[1]);toast('FRIENDLY CONTACT +50 XP');tone(540,.08);tone(700,.1);updateHud();}}
+ for(const p of phages){p.phase+=dt*3;let dx=cell.x-p.x,dy=cell.y-p.y,d=Math.hypot(dx,dy)||1;if(p===boss){p.warning=Math.max(0,p.warning-dt);if(p.warning<=0&&d<270){p.warning=2.2;p.attackX=cell.x;p.attackY=cell.y;toast('BOSS WARNING! DODGE!')}}let chase=d<(p===boss?420:330)?1:.35;p.x+=dx/d*p.speed*chase*dt+Math.sin(p.phase)*14*dt;p.y+=dy/d*p.speed*chase*dt+Math.cos(p.phase*1.3)*14*dt;p.x=Math.max(22,Math.min(W-22,p.x));p.y=Math.max(22,Math.min(H-22,p.y));if(dist(cell,p)<cell.r+p.r){if(cell.shield<=0){cell.integrity-=p===boss?27:19;cell.shield=1.1;cell.x+=dx/d*24;cell.y+=dy/d*24;burst(p.x,p.y,'#ff5ba8',22);say((p===boss?'BOSS HIT! −27 integrity.':'PHAGE HIT! −19 integrity.')+' Evade the pink phage and use the whole field.');tone(140,.18,'sawtooth');fact('Bacteriophages infect bacteria. In this arcade game they are hazards; transduction is a separate phage-mediated DNA-transfer process.');updateHud();if(cell.integrity<=0){cell.integrity=0;updateHud();finish(false);return}}}}
+ 
+ // Fictional antibiotic pulse hazard in later levels: visual game mechanic only.
+ if(level>=3){antibioticWave+=dt*(85+level*12);if(antibioticWave>W+120)antibioticWave=-80;
+   if(Math.abs(cell.x-antibioticWave)<7&&cell.y>90&&cell.y<H-50&&cell.shield<=0){cell.integrity-=8;cell.shield=.55;burst(cell.x,cell.y,'#ff6178',12);say('ANTIBIOTIC PULSE! −8 integrity. Your evolution shield can block this arcade hazard briefly.');updateHud();if(cell.integrity<=0){cell.integrity=0;updateHud();finish(false);return;}}
+ }
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.vy*=.98;p.life-=dt}particles=particles.filter(p=>p.life>0);
+ const needed=5+Math.floor(level*.7);if(dna>=needed)winLevel();updateHud();}
+function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#081421';ctx.fillRect(0,0,W,H);
+ // microscopic star field / grid
+ ctx.strokeStyle='rgba(95,255,238,.055)';ctx.lineWidth=1;for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ for(let i=0;i<45;i++){let x=(i*139+Math.sin(elapsed+i)*8)%W,y=(i*71)%H;ctx.fillStyle='rgba(124,190,220,.23)';ctx.fillRect(x,y,2,2)}
+ // soft obstacle organelles
+ for(const o of maze){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(Math.sin(elapsed*.5+o.phase)*.08);ctx.fillStyle='#142b3a';ctx.strokeStyle='#285166';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-o.w/2,-o.h/2,o.w,o.h,12);ctx.fill();ctx.stroke();ctx.restore()}
+ // portal
+ ctx.save();ctx.translate(portal.x,portal.y);ctx.rotate(elapsed*.7);ctx.beginPath();ctx.arc(0,0,portal.r+Math.sin(elapsed*4)*2,0,Math.PI*2);ctx.strokeStyle=portal.open?'#5fffee':'#38516a';ctx.lineWidth=portal.open?5:3;ctx.shadowBlur=portal.open?25:0;ctx.shadowColor='#5fffee';ctx.stroke();ctx.beginPath();ctx.arc(0,0,portal.r-8,0,Math.PI*2);ctx.strokeStyle=portal.open?'#5fffee66':'#38516a66';ctx.stroke();ctx.restore();
+ // free DNA
+ for(const b of dnaBits){if(b.got)continue;let pulse=1+Math.sin(elapsed*5+b.phase)*.15;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(elapsed*1.3+b.phase);ctx.scale(pulse,pulse);ctx.shadowBlur=19;ctx.shadowColor='#ffd166';ctx.strokeStyle='#ffd166';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-6,-8);ctx.bezierCurveTo(11,-4,-11,4,6,8);ctx.stroke();ctx.strokeStyle='#fff0b8';ctx.lineWidth=1.5;for(let i=-5;i<=5;i+=5){ctx.beginPath();ctx.moveTo(-4,i);ctx.lineTo(4,-i);ctx.stroke()}ctx.restore()}
+ // Cartoon arcade power-ups: speed star, shield orb, DNA-magnet diamond.
+ for(const p of powerups){if(p.got)continue;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(elapsed*1.5+p.phase);let col=p.type==='speed'?'#ffd166':p.type==='shield'?'#5fffee':'#b7a0ff';ctx.shadowBlur=18;ctx.shadowColor=col;ctx.fillStyle=col;ctx.strokeStyle='#ffffffaa';ctx.lineWidth=1.5;ctx.beginPath();if(p.type==='speed'){for(let i=0;i<10;i++){let a=i*Math.PI/5,r=i%2?7:12,x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath()}else if(p.type==='shield'){ctx.arc(0,0,10,0,Math.PI*2)}else{ctx.moveTo(0,-12);ctx.lineTo(10,0);ctx.lineTo(0,12);ctx.lineTo(-10,0);ctx.closePath()}ctx.fill();ctx.stroke();ctx.restore()}
+ // friendly cells
+ for(const f of friends){ctx.save();ctx.translate(f.x,f.y);ctx.rotate(Math.sin(elapsed+f.phase)*.15);ctx.shadowBlur=15;ctx.shadowColor='#8dff9f';ctx.fillStyle='#24533d';ctx.strokeStyle=f.met?'#6c9a7b':'#8dff9f';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,f.r+Math.sin(elapsed*3+f.phase)*1.5,f.r*.75,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle='#8dff9f';ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*1.6);ctx.stroke();ctx.fillStyle='#b6ffbd';ctx.font='12px Rajdhani';ctx.textAlign='center';ctx.fillText(f.met?'✓':'+',0,-23);ctx.restore()}
+ // Boss attack telegraph gives the player a fair warning.
+ if(boss&&boss.warning>1.5){ctx.save();ctx.strokeStyle='#ff6178';ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(boss.attackX,boss.attackY,35+Math.sin(elapsed*12)*5,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ff9eae';ctx.font='10px Orbitron';ctx.textAlign='center';ctx.fillText('DODGE!',boss.attackX,boss.attackY-43);ctx.restore()}
+ // phages, stylized star virus
+ for(const p of phages){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(elapsed*.9+p.phase);ctx.shadowBlur=16;ctx.shadowColor='#ff5ba8';ctx.fillStyle=p===boss?'#8d2346':'#672448';ctx.strokeStyle=p===boss?'#ffb0d2':'#ff5ba8';ctx.lineWidth=p===boss?3:2;ctx.beginPath();for(let i=0;i<12;i++){let a=i*Math.PI/6,r=i%2===0?p.r+3:p.r-3;let x=Math.cos(a)*r,y=Math.sin(a)*r;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath();ctx.fill();ctx.stroke();ctx.rotate(-elapsed*.9-p.phase);ctx.fillStyle='#ffb0d2';ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();for(let i=0;i<6;i++){let a=i*Math.PI/3;ctx.strokeStyle='#ff5ba8';ctx.beginPath();ctx.moveTo(Math.cos(a)*p.r,Math.sin(a)*p.r);ctx.lineTo(Math.cos(a)*(p.r+7),Math.sin(a)*(p.r+7));ctx.stroke()}ctx.restore()}
+ // player trail
+ for(const t of cell.trail){ctx.globalAlpha=Math.max(0,t.life/.35)*.3;ctx.fillStyle='#5fffee';ctx.beginPath();ctx.arc(t.x,t.y,cell.r*.65,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ // cell
+ ctx.save();ctx.translate(cell.x,cell.y);ctx.rotate(Math.sin(elapsed*2)*.07);ctx.shadowBlur=cell.glow>0?34:20;ctx.shadowColor='#5fffee';const evoColors=['#124b58','#1b645d','#315c38','#75602a','#49317c','#8c3d77'];const evoEdges=['#5fffee','#8dff9f','#d8ff7a','#ffd166','#b7a0ff','#ff7bd0'];ctx.fillStyle=evoColors[evolutionStage];ctx.strokeStyle=evoEdges[evolutionStage];ctx.lineWidth=3;ctx.beginPath();if(evolutionStage<2){ctx.ellipse(0,0,cell.r+Math.sin(elapsed*4)*1.5,cell.r*.78,0,0,Math.PI*2)}else if(evolutionStage<4){ctx.moveTo(-cell.r,-2);ctx.quadraticCurveTo(-cell.r-5,-cell.r,0,-cell.r*.85);ctx.quadraticCurveTo(cell.r+7,-cell.r,cell.r,1);ctx.quadraticCurveTo(cell.r+4,cell.r,0,cell.r*.8);ctx.quadraticCurveTo(-cell.r-5,cell.r,-cell.r,-2)}else{for(let i=0;i<12;i++){let a=i*Math.PI/6,r=i%2===0?cell.r+5:cell.r*.8,x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.closePath()}ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle=evoEdges[evolutionStage];ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-7,-4);ctx.bezierCurveTo(5,-13,-5,11,8,3);ctx.stroke();ctx.fillStyle='#d8fffb';ctx.beginPath();ctx.arc(4,-2,2.5,0,Math.PI*2);ctx.fill();if(cell.shield>0){ctx.strokeStyle=evoEdges[evolutionStage]+'cc';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,cell.r+8+Math.sin(elapsed*9)*2,0,Math.PI*2);ctx.stroke();ctx.fillStyle=evoEdges[evolutionStage];ctx.font='9px Orbitron';ctx.textAlign='center';ctx.fillText('SHIELD '+Math.ceil(cell.shield)+'s',0,-cell.r-15)}ctx.restore();
+ // portal instruction overlay
+ if(portal.open){ctx.fillStyle='#5fffee';ctx.font='700 15px Orbitron';ctx.textAlign='center';ctx.shadowBlur=10;ctx.shadowColor='#5fffee';ctx.fillText('EXIT OPEN →',portal.x,portal.y-37);ctx.shadowBlur=0}
+ ctx.fillStyle='#9fb5cf';ctx.font='12px Rajdhani';ctx.textAlign='left';ctx.fillText('ENVIRONMENTAL PRESSURE: '+['LOW','RISING','ELEVATED','HIGH','CRITICAL'][level-1],15,H-15);if(boss){ctx.fillStyle='#ff8ab8';ctx.font='700 11px Orbitron';ctx.fillText('PHAGE BOSS • DODGE TELEGRAPH',15,22)}if(toastText&&elapsed<toastUntil){ctx.fillStyle='#eaffff';ctx.font='700 13px Orbitron';ctx.textAlign='center';ctx.shadowBlur=12;ctx.shadowColor='#5fffee';ctx.fillText(toastText,W/2,30);ctx.shadowBlur=0}
+ for(const p of particles){ctx.globalAlpha=Math.min(1,p.life/p.max);ctx.fillStyle=p.color;ctx.shadowBlur=12;ctx.shadowColor=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r*Math.max(.3,p.life/p.max),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+window.addEventListener('keydown',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();keys[k]=true;if(e.key==='Escape')togglePause();if(e.key===' '&&running&&!paused&&evolutionStage>=4&&dashCooldown<=0){let vx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),vy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0),ll=Math.hypot(vx,vy)||1;cell.x=Math.max(20,Math.min(W-20,cell.x+vx/ll*95));cell.y=Math.max(20,Math.min(H-20,cell.y+vy/ll*95));cell.shield=1.1;dashCooldown=3;burst(cell.x,cell.y,'#b7a0ff',18);toast('DASH!');tone(330,.1,'triangle')}});
+window.addEventListener('keyup',e=>{let k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
+function targetFromEvent(e){const r=canvas.getBoundingClientRect();touchTarget={x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+canvas.addEventListener('pointerdown',e=>{targetFromEvent(e);canvas.setPointerCapture?.(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(e.buttons)targetFromEvent(e)});
+$('startBtn').onclick=startGame;$('soundToggle').onclick=toggleSound;$('pause').onclick=togglePause;$('restart').onclick=()=>{cancelAnimationFrame(raf);$('levelOverlay').classList.add('hidden');$('quizOverlay').classList.add('hidden');startGame()};$('continueBtn').onclick=nextLevel;$('again').onclick=startGame;$('quizContinue').onclick=revealLevelClear;
+resetLevel();draw();
+})();
+</script></body></html>
